@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Panel Aplikacji - Firmowy Dashboard</title>
+	
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	
+	<script>
+		tailwind.config = {
+			darkMode: 'class',
+			theme: {
+				extend: {
+					colors: {
+						'primary': '#8f0047',
+						'secondary': '#669900',
+						'light': '#fafafa',
+						'primary-dark': '#6b0036',
+						'secondary-dark': '#4d7300',
+					},
+					animation: {
+						'slide-in': 'slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+						'fade-in': 'fadeIn 0.3s ease-in-out',
+						'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+					},
+					keyframes: {
+						slideIn: {
+							'0%': { transform: 'translateX(-100%)', opacity: '0' },
+							'100%': { transform: 'translateX(0)', opacity: '1' }
+						},
+						fadeIn: {
+							'0%': { opacity: '0' },
+							'100%': { opacity: '1' }
+						}
+					},
+					backdropBlur: {
+						xs: '2px',
+					}
+				}
+			}
+		}
+	</script>
+	
+	<style>
+		/* Niestandardowe style */
+		.gradient-primary {
+			background: linear-gradient(135deg, #8f0047 0%, #6b0036 100%);
+		}
+		
+		.gradient-secondary {
+			background: linear-gradient(135deg, #669900 0%, #4d7300 100%);
+		}
+		
+		.glass-effect {
+			background: rgba(250, 250, 250, 0.85);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+		}
+		
+		.dark .glass-effect {
+			background: rgba(15, 15, 15, 0.85);
+		}
+		
+		.hover-lift {
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+		
+		.hover-lift:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 12px 24px -10px rgba(143, 0, 71, 0.3);
+		}
+		
+		.notification-badge {
+			animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		}
+		
+		/* Scrollbar styling */
+		::-webkit-scrollbar {
+			width: 8px;
+			height: 8px;
+		}
+		
+		::-webkit-scrollbar-track {
+			background: #fafafa;
+		}
+		
+		::-webkit-scrollbar-thumb {
+			background: linear-gradient(180deg, #8f0047, #669900);
+			border-radius: 4px;
+		}
+		
+		.dark ::-webkit-scrollbar-track {
+			background: #1a1a1a;
+		}
+		
+		/* Menu item animation */
+		.menu-item {
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.menu-item::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 0;
+			height: 100%;
+			width: 3px;
+			background: linear-gradient(180deg, #8f0047, #669900);
+			transform: translateX(-100%);
+			transition: transform 0.3s ease;
+		}
+		
+		.menu-item:hover::before,
+		.menu-item.active::before {
+			transform: translateX(0);
+		}
+		
+		/* Card animations */
+		.app-card {
+			background: linear-gradient(135deg, rgba(250, 250, 250, 0.95) 0%, rgba(250, 250, 250, 0.85) 100%);
+			border: 1px solid rgba(143, 0, 71, 0.1);
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.dark .app-card {
+			background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(30, 30, 30, 0.85) 100%);
+			border: 1px solid rgba(143, 0, 71, 0.2);
+		}
+		
+		.app-card::after {
+			content: '';
+			position: absolute;
+			top: -50%;
+			right: -50%;
+			width: 200%;
+			height: 200%;
+			background: linear-gradient(45deg, transparent, rgba(102, 153, 0, 0.1), transparent);
+			transform: rotate(45deg);
+			transition: all 0.5s ease;
+			opacity: 0;
+		}
+		
+		.app-card:hover::after {
+			animation: shine 0.5s ease;
+		}
+		
+		@keyframes shine {
+			0% { transform: rotate(45deg) translateX(-100%); opacity: 1; }
+			100% { transform: rotate(45deg) translateX(100%); opacity: 0; }
+		}
+	</style>
+</head>
+
+<body class="bg-light dark:bg-gray-950 min-h-screen transition-all duration-500">
+	
+	<!-- Dekoracyjny gradient w tle -->
+	<div class="fixed inset-0 opacity-30 dark:opacity-20 pointer-events-none">
+		<div class="absolute top-0 right-0 w-96 h-96 bg-primary rounded-full filter blur-3xl"></div>
+		<div class="absolute bottom-0 left-0 w-96 h-96 bg-secondary rounded-full filter blur-3xl"></div>
+	</div>
+
+	<!-- Pasek nagłówkowy -->
+	<header class="fixed top-0 left-0 right-0 z-50 glass-effect shadow-lg px-6 py-4 transition-all duration-300">
+		<div class="flex items-center justify-between">
+			<!-- Menu mobilne + logo -->
+			<div class="flex items-center space-x-4">
+				<button id="menu-left-toggle" class="lg:hidden p-2 rounded-lg hover:bg-primary/10 transition-colors">
+					<i class="fas fa-bars text-primary text-xl"></i>
+				</button>
+				
+				<div class="flex items-center space-x-3">
+					<div class="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
+						<i class="fas fa-cube text-white"></i>
+					</div>
+					<div>
+						<h1 class="text-lg font-bold text-gray-900 dark:text-light">Panel Aplikacji</h1>
+						<p class="text-xs text-gray-500 dark:text-gray-400">System Firmowy</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Środkowa sekcja - wyszukiwarka (ukryta na mobile) -->
+			<div class="hidden md:flex items-center flex-1 max-w-md mx-8">
+				<div class="relative w-full">
+					<input type="search" 
+						placeholder="Szukaj aplikacji..." 
+						class="w-full px-4 py-2 pl-10 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border border-primary/20 focus:border-primary focus:outline-none transition-all">
+					<i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+				</div>
+			</div>
+
+			<!-- Prawa sekcja -->
+			<div class="flex items-center space-x-4">
+				<!-- Data (ukryta na mobile) -->
+				<div class="hidden sm:block text-sm text-gray-600 dark:text-gray-300">
+					<span id="current-date"></span>
+				</div>
+				
+				<!-- Przełącznik trybu ciemnego -->
+				<button id="theme-toggle" class="p-2 rounded-lg hover:bg-primary/10 transition-all">
+					<i class="fas fa-moon text-primary dark:hidden"></i>
+					<i class="fas fa-sun text-secondary hidden dark:block"></i>
+				</button>
+
+				<!-- Powiadomienia -->
+				<button id="menu-right-toggle" class="relative p-2 rounded-lg hover:bg-primary/10 transition-all">
+					<i class="fas fa-bell text-primary dark:text-secondary text-xl"></i>
+					<span class="notification-badge absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs rounded-full flex items-center justify-center">4</span>
+				</button>
+
+				<!-- Profil użytkownika -->
+				<div class="flex items-center space-x-3 pl-4 border-l border-gray-300 dark:border-gray-700">
+					<div class="hidden sm:block text-right">
+						<p class="text-sm font-semibold text-gray-900 dark:text-light">Jan Kowalski</p>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Administrator</p>
+					</div>
+					<div class="relative">
+						<img src="https://ui-avatars.com/api/?name=Jan+Kowalski&background=8f0047&color=fff&size=40"
+							alt="Profil" 
+							class="w-10 h-10 rounded-xl ring-2 ring-primary/30 hover:ring-primary transition-all cursor-pointer">
+						<span class="absolute bottom-0 right-0 w-3 h-3 bg-secondary rounded-full border-2 border-white dark:border-gray-900"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<!-- Lewa sekcja - MENU GŁÓWNE -->
+	<aside id="sidebar-left" 
+		class="fixed left-0 top-0 bottom-0 w-72 glass-effect border-r border-gray-200/50 dark:border-gray-700/50 pt-20 p-6 overflow-y-auto transition-all duration-300 transform -translate-x-full lg:translate-x-0 z-40">
+		
+		<div class="mb-8">
+			<h2 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Menu główne</h2>
+			
+			<nav class="space-y-2">
+				<a href="#" class="menu-item flex items-center space-x-3 px-4 py-3 rounded-xl bg-primary/10 text-primary hover-lift">
+					<i class="fas fa-home w-5"></i>
+					<span class="font-medium">Strona główna</span>
+					<span class="ml-auto text-xs bg-primary text-white px-2 py-1 rounded-full">Nowe</span>
+				</a>
+				
+				<a href="#" class="menu-item flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+					<i class="fas fa-star w-5 text-gray-600 dark:text-gray-400"></i>
+					<span class="text-gray-700 dark:text-gray-300">Ulubione</span>
+				</a>
+				
+				<div class="pt-4 pb-2">
+					<h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aplikacje testowe</h3>
+				</div>
+				
+				<a href="#" class="menu-item flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group">
+					<i class="fas fa-flask w-5 text-secondary"></i>
+					<span class="text-gray-700 dark:text-gray-300">Test SST</span>
+					<i class="fas fa-arrow-right ml-auto text-gray-400 group-hover:text-secondary transition-all transform group-hover:translate-x-1"></i>
+				</a>
+				
+				<a href="#" class="menu-item flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group">
+					<i class="fas fa-flask w-5 text-secondary"></i>
+					<span class="text-gray-700 dark:text-gray-300">Test RST</span>
+					<i class="fas fa-arrow-right ml-auto text-gray-400 group-hover:text-secondary transition-all transform group-hover:translate-x-1"></i>
+				</a>
+				
+				<a href="#" class="menu-item flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group">
+					<i class="fas fa-flask w-5 text-secondary"></i>
+					<span class="text-gray-700 dark:text-gray-300">Test RST2</span>
+					<i class="fas fa-arrow-right ml-auto text-gray-400 group-hover:text-secondary transition-all transform group-hover:translate-x-1"></i>
+				</a>
+				
+				<a href="#" class="menu-item flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group">
+					<i class="fas fa-flask w-5 text-secondary"></i>
+					<span class="text-gray-700 dark:text-gray-300">Test RSTCS</span>
+					<i class="fas fa-arrow-right ml-auto text-gray-400 group-hover:text-secondary transition-all transform group-hover:translate-x-1"></i>
+				</a>
+				
+				<div class="pt-4 pb-2">
+					<h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Analityka</h3>
+				</div>
+				
+				<a href="#" class="menu-item flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group">
+					<i class="fas fa-chart-line w-5 text-primary"></i>
+					<span class="text-gray-700 dark:text-gray-300">Portal Analityczny</span>
+					<i class="fas fa-arrow-right ml-auto text-gray-400 group-hover:text-primary transition-all transform group-hover:translate-x-1"></i>
+				</a>
+			</nav>
+		</div>
+
+		<!-- Stopka menu -->
+		<div class="mt-auto pt-6 border-t border-gray-200 dark:border-gray-700">
+			<div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+				<span>Wersja 2.0.1</span>
+				<span>© 2024</span>
+			</div>
+		</div>
+	</aside>
+
+	<!-- Główna sekcja -->
+	<main class="lg:ml-72 lg:mr-80 pt-24 px-6 pb-6 transition-all duration-300">
+		<!-- Nagłówek sekcji -->
+		<div class="mb-8 animate-fade-in">
+			<h1 class="text-3xl font-bold text-gray-900 dark:text-light mb-2">Dostępne Aplikacje</h1>
+			<p class="text-gray-600 dark:text-gray-400">Wybierz aplikację, aby rozpocząć pracę</p>
+		</div>
+
+		<!-- Statystyki (nowy element) -->
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+			<div class="glass-effect rounded-xl p-4 border border-primary/10">
+				<div class="flex items-center justify-between">
+					<div>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Aktywne aplikacje</p>
+						<p class="text-2xl font-bold text-primary">6</p>
+					</div>
+					<i class="fas fa-rocket text-3xl text-primary/20"></i>
+				</div>
+			</div>
+			
+			<div class="glass-effect rounded-xl p-4 border border-secondary/10">
+				<div class="flex items-center justify-between">
+					<div>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Ostatnie logowanie</p>
+						<p class="text-2xl font-bold text-secondary">Dziś</p>
+					</div>
+					<i class="fas fa-clock text-3xl text-secondary/20"></i>
+				</div>
+			</div>
+			
+			<div class="glass-effect rounded-xl p-4 border border-gray-300/30 dark:border-gray-700/30">
+				<div class="flex items-center justify-between">
+					<div>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Status systemu</p>
+						<p class="text-2xl font-bold text-green-600 dark:text-green-500">Online</p>
+					</div>
+					<i class="fas fa-check-circle text-3xl text-green-600/20"></i>
+				</div>
+			</div>
+		</div>
+
+		<!-- Lista aplikacji -->
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<a href="#" class="app-card rounded-2xl p-6 hover-lift group cursor-pointer">
+				<div class="flex items-start space-x-4">
+					<div class="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
+						<i class="fas fa-user-shield text-white"></i>
+					</div>
+					<div class="flex-1">
+						<h3 class="text-lg font-bold text-gray-900 dark:text-light mb-1">TiK</h3>
+						<p class="text-sm text-gray-600 dark:text-gray-400">Techniczna Informacja o Kliencie</p>
+						<div class="flex items-center mt-3 text-xs text-primary">
+							<i class="fas fa-arrow-right mr-2"></i>
+							<span>Otwórz aplikację</span>
+						</div>
+					</div>
+				</div>
+			</a>
+
+			<a href="#" class="app-card rounded-2xl p-6 hover-lift group cursor-pointer">
+				<div class="flex items-start space-x-4">
+					<div class="w-12 h-12 gradient-secondary rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
+						<i class="fas fa-network-wired text-white"></i>
+					</div>
+					<div class="flex-1">
+						<h3 class="text-lg font-bold text-gray-900 dark:text-light mb-1">AiES OAS</h3>
+						<p class="text-sm text-gray-600 dark:text-gray-400">Obsługa Awarii Sieciowych</p>
+						<div class="flex items-center mt-3 text-xs text-secondary">
+							<i class="fas fa-arrow-right mr-2"></i>
+							<span>Otwórz aplikację</span>
+						</div>
+					</div>
+				</div>
+			</a>
+
+			<a href="#" class="app-card rounded-2xl p-6 hover-lift group cursor-pointer">
+				<div class="flex items-start space-x-4">
+					<div class="w-12 h-12 gradient-secondary rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
+						<i class="fas fa-tasks text-white"></i>
+					</div>
+					<div class="flex-1">
+						<h3 class="text-lg font-bold text-gray-900 dark:text-light mb-1">AiES ZP</h3>
+						<p class="text-sm text-gray-600 dark:text-gray-400">Zarządzanie Pracami</p>
+						<div class="flex items-center mt-3 text-xs text-secondary">
+							<i class="fas fa-arrow-right mr-2"></i>
+							<span>Otwórz aplikację</span>
+						</div>
+					</div>
+				</div>
+			</a>
+
+			<a href="#" class="app-card rounded-2xl p-6 hover-lift group cursor-pointer">
+				<div class="flex items-start space-x-4">
+					<div class="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
+						<i class="fas fa-cogs text-white"></i>
+					</div>
+					<div class="flex-1">
+						<h3 class="text-lg font-bold text-gray-900 dark:text-light mb-1">AiES USS</h3>
+						<p class="text-sm text-gray-600 dark:text-gray-400">Utrzymanie Sprawności Sieci</p>
+						<div class="flex items-center mt-3 text-xs text-primary">
+							<i class="fas fa-arrow-right mr-2"></i>
+							<span>Otwórz aplikację</span>
+						</div>
+					</div>
+				</div>
+			</a>
+
+			<a href="#" class="app-card rounded-2xl p-6 hover-lift group cursor-pointer">
+				<div class="flex items-start space-x-4">
+					<div class="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
+						<i class="fas fa-map-marked-alt text-white"></i>
+					</div>
+					<div class="flex-1">
+						<h3 class="text-lg font-bold text-gray-900 dark:text-light mb-1">GEWO</h3>
+						<p class="text-sm text-gray-600 dark:text-gray-400">Graficzna Ewidencja Obiektów</p>
+						<div class="flex items-center mt-3 text-xs text-primary">
+							<i class="fas fa-arrow-right mr-2"></i>
+							<span>Otwórz aplikację</span>
+						</div>
+					</div>
+				</div>
+			</a>
+
+			<a href="#" class="app-card rounded-2xl p-6 hover-lift group cursor-pointer">
+				<div class="flex items-start space-x-4">
+					<div class="w-12 h-12 gradient-secondary rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
+						<i class="fas fa-database text-white"></i>
+					</div>
+					<div class="flex-1">
+						<h3 class="text-lg font-bold text-gray-900 dark:text-light mb-1">GEWO Plus</h3>
+						<p class="text-sm text-gray-600 dark:text-gray-400">Rozszerzona Ewidencja</p>
+						<div class="flex items-center mt-3 text-xs text-secondary">
+							<i class="fas fa-arrow-right mr-2"></i>
+							<span>Otwórz aplikację</span>
+						</div>
+					</div>
+				</div>
+			</a>
+		</div>
+	</main>
+
+	<!-- Prawa sekcja - KOMUNIKATY -->
+	<aside id="sidebar-right" 
+		class="fixed right-0 top-0 bottom-0 w-80 glass-effect border-l border-gray-200/50 dark:border-gray-700/50 pt-20 p-6 overflow-y-auto transition-all duration-300 transform translate-x-full lg:translate-x-0 z-40">
+		
+		<div class="mb-6">
+			<h2 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Komunikaty</h2>
+		</div>
+
+		<!-- Lista komunikatów -->
+		<div class="space-y-3">
+			<!-- Komunikat - Prace -->
+			<div class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl p-4 border border-yellow-200 dark:border-yellow-800 hover-lift cursor-pointer">
+				<div class="flex items-start space-x-3">
+					<div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
+						<i class="fas fa-tools text-white text-xs"></i>
+					</div>
+					<div class="flex-1">
+						<h4 class="font-semibold text-gray-900 dark:text-light text-sm">Planowane prace</h4>
+						<p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Wymiana urządzenia sieciowego</p>
+						<p class="text-xs text-yellow-600 dark:text-yellow-500 mt-2">Za 2 godziny</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Komunikat - Info -->
+			<div class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800 hover-lift cursor-pointer">
+				<div class="flex items-start space-x-3">
+					<div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+						<i class="fas fa-info text-white text-xs"></i>
+					</div>
+					<div class="flex-1">
+						<h4 class="font-semibold text-gray-900 dark:text-light text-sm">Informacja</h4>
+						<p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Nowa wersja systemu dostępna</p>
+						<p class="text-xs text-blue-600 dark:text-blue-500 mt-2">Dziś, 14:30</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Komunikat - Prace trwające -->
+			<div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 border border-purple-200 dark:border-purple-800 hover-lift cursor-pointer">
+				<div class="flex items-start space-x-3">
+					<div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center animate-pulse">
+						<i class="fas fa-spinner text-white text-xs"></i>
+					</div>
+					<div class="flex-1">
+						<h4 class="font-semibold text-gray-900 dark:text-light text-sm">Prace w toku</h4>
+						<p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Okno serwisowe trwa...</p>
+						<p class="text-xs text-purple-600 dark:text-purple-500 mt-2">Od 13:00</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Komunikat - Problem -->
+			<div class="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 rounded-xl p-4 border border-red-200 dark:border-red-800 hover-lift cursor-pointer">
+				<div class="flex items-start space-x-3">
+					<div class="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
+						<i class="fas fa-exclamation-triangle text-white text-xs"></i>
+					</div>
+					<div class="flex-1">
+						<h4 class="font-semibold text-gray-900 dark:text-light text-sm">Awaria</h4>
+						<p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Problem z dostępem do bazy</p>
+						<p class="text-xs text-red-600 dark:text-red-500 mt-2">Priorytet: Wysoki</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Sekcja aktywności -->
+		<div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+			<h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Ostatnia aktywność</h3>
+			<div class="space-y-3">
+				<div class="flex items-center space-x-3 text-xs">
+					<div class="w-2 h-2 bg-secondary rounded-full"></div>
+					<span class="text-gray-600 dark:text-gray-400">Login: 09:24</span>
+				</div>
+				<div class="flex items-center space-x-3 text-xs">
+					<div class="w-2 h-2 bg-primary rounded-full"></div>
+					<span class="text-gray-600 dark:text-gray-400">Ostatnia sesja: 2h 15min</span>
+				</div>
+			</div>
+		</div>
+	</aside>
+
+	<!-- Przycisk do otwierania menu mobilnego (pływający) -->
+	<button class="lg:hidden fixed bottom-6 right-6 w-14 h-14 gradient-primary rounded-full shadow-xl flex items-center justify-center text-white z-50 hover:scale-110 transition-transform">
+		<i class="fas fa-plus"></i>
+	</button>
+
+	<script>
+		// Formatowanie daty
+		const setCurrentDate = () => {
+			const now = new Date();
+			const options = { 
+				weekday: 'long', 
+				day: 'numeric', 
+				month: 'long',
+				hour: '2-digit',
+				minute: '2-digit'
+			};
+			document.getElementById('current-date').textContent = now.toLocaleDateString('pl-PL', options);
+		};
+		setCurrentDate();
+		setInterval(setCurrentDate, 60000); // Aktualizuj co minutę
+
+		// Tryb ciemny
+		const themeToggle = document.getElementById('theme-toggle');
+		const html = document.documentElement;
+
+		// Sprawdź zapisane preferencje
+		if (localStorage.getItem('darkMode') === 'true' || 
+			(!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+			html.classList.add('dark');
+		}
+
+		themeToggle.addEventListener('click', () => {
+			html.classList.toggle('dark');
+			localStorage.setItem('darkMode', html.classList.contains('dark'));
+			
+			// Animacja ikony
+			themeToggle.querySelector('i').classList.add('animate-spin');
+			setTimeout(() => {
+				themeToggle.querySelector('i').classList.remove('animate-spin');
+			}, 500);
+		});
+
+		// Menu mobilne
+		const menuLeftToggle = document.getElementById('menu-left-toggle');
+		const menuRightToggle = document.getElementById('menu-right-toggle');
+		const sidebarLeft = document.getElementById('sidebar-left');
+		const sidebarRight = document.getElementById('sidebar-right');
+
+		menuLeftToggle.addEventListener('click', () => {
+			sidebarLeft.classList.toggle('-translate-x-full');
+			// Zamknij prawe menu jeśli otwarte
+			if (!sidebarRight.classList.contains('translate-x-full')) {
+				sidebarRight.classList.add('translate-x-full');
+			}
+		});
+
+		menuRightToggle.addEventListener('click', () => {
+			sidebarRight.classList.toggle('translate-x-full');
+			// Zamknij lewe menu jeśli otwarte
+			if (!sidebarLeft.classList.contains('-translate-x-full')) {
+				sidebarLeft.classList.add('-translate-x-full');
+			}
+		});
+
+		// Zamknij menu po kliknięciu poza nim
+		document.addEventListener('click', (e) => {
+			if (window.innerWidth < 1024) {
+				if (!sidebarLeft.contains(e.target) && !menuLeftToggle.contains(e.target)) {
+					sidebarLeft.classList.add('-translate-x-full');
+				}
+				if (!sidebarRight.contains(e.target) && !menuRightToggle.contains(e.target)) {
+					sidebarRight.classList.add('translate-x-full');
+				}
+			}
+		});
+
+		// Animacja kart przy ładowaniu
+		window.addEventListener('load', () => {
+			const cards = document.querySelectorAll('.app-card');
+			cards.forEach((card, index) => {
+				setTimeout(() => {
+					card.style.opacity = '0';
+					card.style.transform = 'translateY(20px)';
+					card.style.transition = 'all 0.5s ease';
+					
+					setTimeout(() => {
+						card.style.opacity = '1';
+						card.style.transform = 'translateY(0)';
+					}, 100);
+				}, index * 100);
+			});
+		});
+	</script>
+</body>
+</html>
