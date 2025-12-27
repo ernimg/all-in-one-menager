@@ -1,0 +1,299 @@
+/* Global styles moved from koncept/MainPage to be available across app */
+
+:root {
+  --color-primary: #8f0047;
+  --color-secondary: #669900;
+  --color-light: #fafafa;
+  --color-muted: #f6f6f7;
+  --border-muted: rgba(143, 0, 71, 0.06);
+  --card-radius: 14px;
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #6b0036 100%);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #4d7300 100%);
+}
+
+.glass-effect {
+  background: rgba(250, 250, 250, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.dark .glass-effect {
+  background: rgba(15, 15, 15, 0.85);
+}
+
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -10px rgba(143, 0, 71, 0.3);
+}
+
+.notification-badge {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fafafa;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    var(--color-primary),
+    var(--color-secondary)
+  );
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+/* Menu item animation */
+.menu-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: linear-gradient(
+    180deg,
+    var(--color-primary),
+    var(--color-secondary)
+  );
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.menu-item:hover::before,
+.menu-item.active::before {
+  transform: translateX(0);
+}
+
+/* Card animations */
+.app-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
+  border: 1px solid var(--border-muted);
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--card-radius);
+  box-shadow: 0 6px 18px rgba(20, 20, 20, 0.04);
+  min-height: 80px;
+}
+
+.dark .app-card {
+  background: linear-gradient(
+    180deg,
+    rgba(20, 20, 20, 0.7) 0%,
+    rgba(18, 18, 18, 0.6) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+.app-card::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(102, 153, 0, 0.1),
+    transparent
+  );
+  transform: rotate(45deg);
+  transition: all 0.5s ease;
+  opacity: 0;
+}
+
+.app-card:hover::after {
+  animation: shine 0.5s ease;
+}
+
+/* Card content specifics */
+.app-card .icon-wrapper {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.app-card h3 {
+  font-size: 1.05rem;
+}
+.app-card p {
+  color: #6b6b6b;
+  margin-top: 6px;
+}
+.app-card .action {
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+/* Header tweaks */
+#app-header {
+  min-height: 72px;
+}
+#app-header .gradient-primary {
+  box-shadow: none;
+}
+
+/* Search input refinement */
+.search-input {
+  border-radius: 9999px;
+  border: 1px solid rgba(143, 0, 71, 0.08);
+  padding-left: 3rem;
+}
+
+/* Right panel notification cards */
+.notify-card {
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+.notify-card.yellow {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 249, 230, 1),
+    rgba(255, 245, 230, 0.6)
+  );
+  border-color: rgba(234, 179, 8, 0.12);
+}
+.notify-card.blue {
+  background: linear-gradient(
+    90deg,
+    rgba(233, 247, 255, 1),
+    rgba(229, 246, 255, 0.6)
+  );
+  border-color: rgba(59, 130, 246, 0.08);
+}
+.notify-card.purple {
+  background: linear-gradient(
+    90deg,
+    rgba(250, 240, 255, 1),
+    rgba(250, 238, 255, 0.6)
+  );
+  border-color: rgba(139, 92, 246, 0.08);
+}
+.notify-card.red {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 240, 240, 1),
+    rgba(255, 235, 235, 0.6)
+  );
+  border-color: rgba(239, 68, 68, 0.08);
+}
+
+/* Dark mode tweaks for menu, notifications and inputs */
+.dark .menu-item {
+  background: transparent;
+}
+.dark .menu-item .fas,
+.dark .menu-item span {
+  color: #e6e6e6;
+}
+.dark .menu-item:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.dark .notify-card {
+  border-color: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.02);
+  color: #e6e6e6;
+}
+.dark .notify-card.yellow {
+  background: linear-gradient(
+    90deg,
+    rgba(60, 50, 0, 0.12),
+    rgba(60, 50, 0, 0.06)
+  );
+}
+.dark .notify-card.blue {
+  background: linear-gradient(
+    90deg,
+    rgba(10, 30, 60, 0.12),
+    rgba(10, 30, 60, 0.06)
+  );
+}
+.dark .notify-card.purple {
+  background: linear-gradient(
+    90deg,
+    rgba(40, 10, 60, 0.12),
+    rgba(40, 10, 60, 0.06)
+  );
+}
+.dark .notify-card.red {
+  background: linear-gradient(
+    90deg,
+    rgba(60, 10, 10, 0.12),
+    rgba(60, 10, 10, 0.06)
+  );
+}
+.dark .notify-card .text-xs {
+  color: #cfcfcf;
+}
+
+.dark .search-input {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.04);
+  color: #e6e6e6;
+}
+
+/* Ensure actual input text and placeholder are visible in dark */
+.dark input.search-input {
+  color: #e6e6e6;
+}
+.dark input.search-input::placeholder {
+  color: rgba(230, 230, 230, 0.55);
+}
+.dark #app-header i.fas.fa-search {
+  color: rgba(230, 230, 230, 0.65);
+}
+.dark #app-header h1,
+.dark #app-header p {
+  color: #e6e6e6;
+}
+.dark aside[id^="sidebar"] {
+  background: rgba(10, 10, 10, 0.6);
+}
+
+@keyframes shine {
+  0% {
+    transform: rotate(45deg) translateX(-100%);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(45deg) translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Small helpers */
+.bg-light {
+  background-color: var(--color-light);
+}
