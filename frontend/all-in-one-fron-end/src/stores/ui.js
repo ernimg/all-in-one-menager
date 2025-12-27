@@ -1,7 +1,5 @@
 import { defineStore } from "pinia";
 
-const API_BASE = process.env.VUE_APP_API_BASE || "http://localhost:3000";
-
 export const useUIStore = defineStore("ui", {
   state: () => ({
     darkMode:
@@ -11,9 +9,37 @@ export const useUIStore = defineStore("ui", {
         window.matchMedia("(prefers-color-scheme: dark)").matches),
     menuLeftOpen: false,
     menuRightOpen: false,
-    notifications: [],
+    notifications: [
+      {
+        id: 1,
+        title: "Aktualizacja systemu",
+        message: "Planowana konserwacja o 02:00",
+        type: "blue",
+        read: false,
+      },
+      {
+        id: 2,
+        title: "Nowe uprawnienia",
+        message: "Przyznano dostęp do raportów",
+        type: "yellow",
+        read: false,
+      },
+      {
+        id: 3,
+        title: "Błąd integracji",
+        message: "Problem z API zewnętrznym",
+        type: "red",
+        read: true,
+      },
+      {
+        id: 4,
+        title: "Informacja",
+        message: "Nowa wersja aplikacji dostępna",
+        type: "purple",
+        read: false,
+      },
+    ],
     user: {
-      id: "jan.kowalski",
       name: "Jan Kowalski",
       role: "Administrator",
     },
@@ -35,78 +61,19 @@ export const useUIStore = defineStore("ui", {
       this.menuRightOpen = !this.menuRightOpen;
       if (this.menuRightOpen) this.menuLeftOpen = false;
     },
-    async fetchNotifications(userId = null, unreadOnly = false) {
-      try {
-        const url = new URL(`${API_BASE}/api/notifications`);
-        if (userId) url.searchParams.set("userId", userId);
-        if (unreadOnly) url.searchParams.set("unreadOnly", "true");
-        const res = await fetch(url.toString(), {
-          headers: { "Content-Type": "application/json" },
-        });
-        if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
-        const data = await res.json();
-        this.notifications = data;
-      } catch (err) {
-        console.error("fetchNotifications error", err);
-      }
+    addNotification(notification) {
+      const id = Date.now();
+      this.notifications.unshift({ id, ...notification, read: false });
     },
-    async addNotification(notification) {
-      try {
-        const res = await fetch(`${API_BASE}/api/notifications`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(notification),
-        });
-        if (!res.ok) throw new Error("Failed to add notification");
-        const data = await res.json();
-        this.notifications.unshift(data);
-        return data;
-      } catch (err) {
-        console.error("addNotification error", err);
-        throw err;
-      }
+    markRead(id) {
+      const item = this.notifications.find((n) => n.id === id);
+      if (item) item.read = true;
     },
-    async markRead(id) {
-      try {
-        const res = await fetch(`${API_BASE}/api/notifications/${id}/read`, {
-          method: "PUT",
-        });
-        if (!res.ok) throw new Error("Failed to mark read");
-        const updated = await res.json();
-        const idx = this.notifications.findIndex((n) => n.id === updated.id);
-        if (idx !== -1) this.notifications.splice(idx, 1, updated);
-        return updated;
-      } catch (err) {
-        console.error("markRead error", err);
-      }
+    markAllRead() {
+      this.notifications.forEach((n) => (n.read = true));
     },
-    async markAllRead(userId = null) {
-      try {
-        const url = new URL(`${API_BASE}/api/notifications/mark-all-read`);
-        if (userId) url.searchParams.set("userId", userId);
-        const res = await fetch(url.toString(), { method: "PUT" });
-        if (!res.ok) throw new Error("Failed to mark all read");
-        // update local state
-        this.notifications = this.notifications.map((n) => ({
-          ...n,
-          read: true,
-        }));
-        const data = await res.json();
-        return data;
-      } catch (err) {
-        console.error("markAllRead error", err);
-      }
-    },
-    async removeNotification(id) {
-      try {
-        const res = await fetch(`${API_BASE}/api/notifications/${id}`, {
-          method: "DELETE",
-        });
-        if (!res.ok) throw new Error("Failed to delete");
-        this.notifications = this.notifications.filter((n) => n.id !== id);
-      } catch (err) {
-        console.error("removeNotification error", err);
-      }
+    removeNotification(id) {
+      this.notifications = this.notifications.filter((n) => n.id !== id);
     },
   },
   getters: {
