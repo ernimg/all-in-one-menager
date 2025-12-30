@@ -106,6 +106,14 @@
       <!-- right content slot (notifications etc.) -->
     </SidebarRight>
   </div>
+    <button 
+      class="fab-button group"
+      @click="addToFavorites"
+      title="Dodaj do ulubionych"
+    >
+      <i class="fas fa-heart text-lg transition-transform duration-300 group-hover:scale-110"></i>
+      <span class="fab-label">Dodaj do ulubionych</span>
+    </button>
 </template>
 
 <script>
@@ -123,6 +131,13 @@ export default {
     const ui = useUIStore();
     const cards = ref(null);
 
+
+    const isFavorite = ref(false);
+    
+    const toggleFavorite = () => {
+      isFavorite.value = !isFavorite.value;
+    
+    };
     const onOutsideClick = (e) => {
       if (window.innerWidth < 1024) {
         const left = document.getElementById("sidebar-left");
@@ -176,11 +191,149 @@ export default {
       });
     });
 
-    return { ui, cards };
+    return { ui, cards,isFavorite,toggleFavorite};
   },
 };
 </script>
 
 <style>
-/* global-ish styles are kept in component earlier or public index */
+/* Podstawowy styl przycisku (Floating Action Button) */
+.fab-button {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  z-index: 1000;                 /* Zawsze na wierzchu */
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  padding: 14px 24px;
+  min-height: 56px;
+
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: var(--color-light);
+  
+  /* GRADIENT – Twój kolor primary */
+  background: linear-gradient(135deg, 
+              var(--color-primary) 0%, 
+              #6a0036 100%);   /* ciemniejszy odcień primary dla głębi */
+
+  border: none;
+  border-radius: 16px;
+
+  /* CIENIE – profesjonalny efekt */
+  box-shadow: 
+    0 10px 30px rgba(143, 0, 71, 0.45),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover – delikatne uniesienie i jasniejszy gradient */
+.fab-button:hover {
+  transform: translateY(-5px) scale(1.02);
+  background: linear-gradient(135deg, 
+              #9a0050 0%, 
+              #7a0040 100%);
+  box-shadow: 
+    0 16px 40px rgba(143, 0, 71, 0.6),
+    0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Kliknięcie – lekki „wgniecenie” */
+.fab-button:active {
+  transform: translateY(-2px) scale(0.98);
+  box-shadow: 
+    0 6px 20px rgba(143, 0, 71, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Focus – outline dla dostępności */
+.fab-button:focus-visible {
+  outline: none;
+  box-shadow: 
+    0 0 0 4px rgba(143, 0, 71, 0.3),
+    0 10px 30px rgba(143, 0, 71, 0.45);
+}
+
+/* Etykieta – ukryta na małych ekranach */
+.fab-label {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* RESPONSYWNOŚĆ – tylko ikona na telefonach */
+@media (max-width: 640px) {
+  .fab-button {
+    padding: 18px;
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+  }
+  .fab-label {
+    display: none;
+  }
+}
+
+/* ────────────────────────────────────────────────────── */
+/* ANIMACJA POTWIERDZENIA (po kliknięciu) */
+/* ────────────────────────────────────────────────────── */
+.fab-button.added {
+  animation: heartBeat 1.2s ease-in-out;
+}
+
+@keyframes heartBeat {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.2); }
+  60%  { transform: scale(1); }
+  80%  { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Pulsująca kropka (wizualny feedback) */
+.pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.7);
+  opacity: 0;
+  z-index: -1;
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* ────────────────────────────────────────────────────── */
+/* DARK MODE – automatyczna adaptacja */
+/* ────────────────────────────────────────────────────── */
+.dark .fab-button {
+  box-shadow: 
+    0 10px 30px rgba(143, 0, 71, 0.6),
+    0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.dark .fab-button:hover {
+  box-shadow: 
+    0 16px 40px rgba(143, 0, 71, 0.75),
+    0 6px 20px rgba(0, 0, 0, 0.5);
+}
 </style>
