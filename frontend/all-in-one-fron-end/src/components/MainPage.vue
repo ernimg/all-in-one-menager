@@ -31,7 +31,7 @@
           <div class="flex items-center justify-between">
             <div>
               <p class="text-xs text-gray-500 dark:text-gray-400">
-                Aktywne aplikacje
+                Aktywni użytkownicy
               </p>
               <p class="text-2xl font-bold text-primary">6</p>
             </div>

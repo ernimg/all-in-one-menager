@@ -35,7 +35,7 @@
           <h3
             class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
           >
-            Aplikacje testowe
+            Aplikacje Systemowe
           </h3>
         </div>
 
